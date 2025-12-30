@@ -1,0 +1,4 @@
+jobspy
+pandas
+supabase
+python-dotenv

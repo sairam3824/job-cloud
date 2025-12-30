@@ -1,0 +1,13 @@
+.DS_Store
+__pycache__/
+*.pyc
+.env
+.env.local
+.venv/
+venv/
+jobs.csv
+daily_jobs.csv
+# Ignored frontend build artifacts
+frontend/.next/
+frontend/node_modules/
+
