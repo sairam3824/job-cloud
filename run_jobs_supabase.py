@@ -116,6 +116,8 @@ from supabase import create_client
 from datetime import datetime, date
 from dotenv import load_dotenv
 import json
+from datetime import datetime
+import pytz
 
 load_dotenv()
 
@@ -156,7 +158,9 @@ for r in roles:
             frames.append(df)
 
 final = pd.concat(frames, ignore_index=True)
-final["crawled_date"] = date.today().isoformat()
+IST = pytz.timezone("Asia/Kolkata")
+ist_now = datetime.now(IST).date().isoformat()
+final["crawled_date"] = ist_now
 
 # ---- Normalize ----
 
