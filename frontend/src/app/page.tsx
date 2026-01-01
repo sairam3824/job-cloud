@@ -1,233 +1,315 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { Calendar, MapPin, Briefcase, ExternalLink, Globe } from "lucide-react";
-
-type Job = {
-    id: string;
-    title: string;
-    company: string;
-    location: string;
-    job_url: string;
-    site: string;
-    crawled_date: string;
-};
+import { useState, useEffect } from "react";
+import styles from "./page.module.css";
+import { FileText, ArrowRight, Loader2, CheckCircle, Upload, AlertCircle, Award } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const [jobs, setJobs] = useState<Job[]>([]);
+    const [file, setFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
-    const [availableDates, setAvailableDates] = useState<Set<string>>(new Set());
+    const [result, setResult] = useState<any>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [loadingStep, setLoadingStep] = useState(0);
 
-    // Format date as YYYY-MM-DD for database query
-    const formatDate = (date: Date) => {
-        return date.toISOString().split("T")[0];
-    };
+    const LOADING_STEPS = [
+        "Uploading...",
+        "Parsing PDF...",
+        "Analyzing Content...",
+        "Checking Keywords...",
+        "Predicting Score...",
+        "Finalizing..."
+    ];
 
-    // Fetch dates that have jobs
     useEffect(() => {
-        async function fetchDates() {
-            const { data, error } = await supabase
-                .from("jobs")
-                .select("crawled_date");
-
-            if (data) {
-                const dates = new Set(data.map((job) => job.crawled_date));
-                setAvailableDates(dates);
-            }
+        let interval: NodeJS.Timeout;
+        if (loading) {
+            setLoadingStep(0);
+            interval = setInterval(() => {
+                setLoadingStep((prev) => (prev + 1) % LOADING_STEPS.length);
+            }, 2000); // Change text every 2 seconds
         }
-        fetchDates();
+        return () => clearInterval(interval);
+    }, [loading]);
 
-        // Also fetch jobs for initial date (today)
-        fetchJobs(new Date());
-    }, []);
-
-    const fetchJobs = async (date: Date) => {
-        setLoading(true);
-        const dateStr = formatDate(date);
-
-        const { data, error } = await supabase
-            .from("jobs")
-            .select("*")
-            .eq("crawled_date", dateStr)
-            .order("created_at", { ascending: false });
-
-        if (error) {
-            console.error("Error fetching jobs:", error);
-        } else {
-            setJobs(data || []);
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setFile(e.target.files[0]);
+            setError(null);
+            setResult(null);
         }
-        setLoading(false);
     };
 
-    const handleDateClick = (date: Date) => {
-        setSelectedDate(date);
-        fetchJobs(date);
+    const handleUpload = async () => {
+        if (!file) return;
+
+        setLoading(true);
+        setError(null);
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            // Use environment variable or default to local open-resume instance
+            // Note: In production, ensure this URL points to your deployed Render service
+            const apiUrl = process.env.NEXT_PUBLIC_RESUME_PARSER_URL || "http://localhost:3000/api/parser";
+
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!response.ok) {
+                // Try to get error details from JSON response
+                let errorDetails = "Failed to parse resume";
+                try {
+                    const errorJson = await response.json();
+                    if (errorJson.error) errorDetails = errorJson.error;
+                    if (errorJson.details) errorDetails += `: ${errorJson.details}`;
+                } catch (e) {
+                    // Ignore json parse error
+                }
+                throw new Error(errorDetails);
+            }
+
+            const data = await response.json();
+            setResult(data);
+        } catch (err) {
+            console.error(err);
+            setError(err instanceof Error ? err.message : "Failed to connect to the parser service.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <main className="min-h-screen p-8 max-w-7xl mx-auto">
-            {/* Header */}
-            <header className="mb-12 text-center animate-fade-in">
-                <h1 className="text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-pink-500 mb-4">
-                    Job Cloud
-                </h1>
-                <p className="text-gray-400 text-lg">
-                    Daily curated job listings for Software Engineers
-                </p>
-            </header>
+        <div className={styles.container}>
+            <main className={styles.main}>
+                <div className={styles.hero}>
+                    <div className={styles.iconWrapper}>
+                        <FileText size={64} className={styles.icon} />
+                    </div>
+                    <h1 className={styles.title}>Resume Parser</h1>
+                    <p className={styles.description}>
+                        Upload your resume to evaluate its ATS score and match with job opportunities.
+                    </p>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Calendar Sidebar */}
-                <div className="lg:col-span-4 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-                    <div className="glass p-6 rounded-2xl sticky top-8">
-                        <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                            <Calendar className="w-5 h-5 text-pink-500" />
-                            Select Date
-                        </h2>
-                        <CalendarComponent
-                            selectedDate={selectedDate}
-                            onDateSelect={handleDateClick}
-                            availableDates={availableDates}
-                        />
+                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        {!result ? (
+                            <div style={{
+                                marginTop: '2rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '1.5rem',
+                                width: '100%',
+                                maxWidth: '500px'
+                            }}>
+                                <input
+                                    type="file"
+                                    accept=".pdf"
+                                    onChange={handleFileChange}
+                                    style={{ display: 'none' }}
+                                    id="resume-upload"
+                                />
+                                <label
+                                    htmlFor="resume-upload"
+                                    className={styles.comingSoon} /* Reusing existing style for base */
+                                    style={{
+                                        cursor: 'pointer',
+                                        padding: '2rem',
+                                        border: '2px dashed #3f3f46',
+                                        borderRadius: '12px',
+                                        width: '100%',
+                                        textAlign: 'center',
+                                        background: 'transparent',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        gap: '1rem'
+                                    }}
+                                >
+                                    <Upload size={32} className="text-gray-400" />
+                                    <span style={{ fontSize: '1.1rem' }}>
+                                        {file ? file.name : "Click to Upload Resume (PDF)"}
+                                    </span>
+                                </label>
 
-                        <div className="mt-8 pt-6 border-t border-gray-700">
-                            <h3 className="text-sm font-medium text-gray-400 mb-2">Stats</h3>
-                            <div className="flex justify-between items-center text-sm">
-                                <span>Jobs Found:</span>
-                                <span className="font-bold text-white">{jobs.length}</span>
+                                {file && (
+                                    <button
+                                        onClick={handleUpload}
+                                        disabled={loading}
+                                        className={styles.primaryButton}
+                                        style={{ width: '100%', justifyContent: 'center' }}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className={styles.spinner} /> {LOADING_STEPS[loadingStep]}
+                                            </>
+                                        ) : (
+                                            "Analyze Resume"
+                                        )}
+                                    </button>
+                                )}
+
+                                {loading && (
+                                    <p style={{ fontSize: '0.9rem', color: '#e4e4e7', textAlign: 'center', marginTop: '0.5rem', opacity: 0.9 }}>
+                                        Results may take 1-2 minutes. (Beta Version)
+                                    </p>
+                                )}
+                                {error && (
+                                    <div style={{
+                                        color: '#ef4444',
+                                        marginTop: '0.5rem',
+                                        background: 'rgba(239, 68, 68, 0.1)',
+                                        padding: '1rem',
+                                        borderRadius: '8px',
+                                        fontSize: '0.9rem',
+                                        width: '100%',
+                                        textAlign: 'center'
+                                    }}>
+                                        <AlertCircle size={16} style={{ display: 'inline', marginRight: '5px', verticalAlign: 'text-bottom' }} />
+                                        {error}
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        ) : (
+                            <div style={{
+                                marginTop: '2rem',
+                                width: '100%',
+                                maxWidth: '800px',
+                                display: 'grid',
+                                gridTemplateColumns: 'minmax(300px, 1fr) 1fr',
+                                gap: '1.5rem',
+                                alignItems: 'start'
+                            }}>
+                                {/* Score Card */}
+                                <div style={{
+                                    background: '#18181b',
+                                    padding: '2rem',
+                                    borderRadius: '16px',
+                                    border: '1px solid #27272a',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    textAlign: 'center'
+                                }}>
+                                    <h3 style={{ fontSize: '1.1rem', color: '#a1a1aa', marginBottom: '1rem' }}>ATS Match Score</h3>
+                                    <div style={{
+                                        width: '120px',
+                                        height: '120px',
+                                        borderRadius: '50%',
+                                        border: `8px solid ${result.score?.totalScore > 70 ? '#22c55e' : result.score?.totalScore > 40 ? '#eab308' : '#ef4444'}`,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontWeight: 'bold',
+                                        color: '#fff',
+                                        marginBottom: '1rem'
+                                    }}>
+                                        <span style={{ fontSize: '2.5rem', lineHeight: '1' }}>{result.score?.totalScore || 0}</span>
+                                        <span style={{ fontSize: '0.8rem', color: '#a1a1aa', marginTop: '4px' }}>± 5</span>
+                                    </div>
+                                    <p style={{ fontSize: '0.9rem', color: '#71717a' }}>
+                                        {result.score?.totalScore > 70 ? 'Excellent! Your resume is well-optimized.' :
+                                            result.score?.totalScore > 40 ? 'Good start, but needs improvement.' : 'Needs significant updates.'}
+                                    </p>
+                                </div>
 
-                {/* Job Feed */}
-                <div className="lg:col-span-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-                    <div className="mb-6 flex items-center justify-between">
-                        <h2 className="text-2xl font-bold">
-                            Jobs for {selectedDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                        </h2>
+                                {/* Details Card */}
+                                <div style={{
+                                    background: '#18181b',
+                                    padding: '1.5rem',
+                                    borderRadius: '16px',
+                                    border: '1px solid #27272a'
+                                }}>
+                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        <Award size={20} className="text-blue-400" /> Score Breakdown
+                                    </h3>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        {result.score?.breakdown && Object.entries(result.score.breakdown).map(([key, value]) => (
+                                            <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                                <span style={{ textTransform: 'capitalize', color: '#d4d4d8' }}>
+                                                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                                                </span>
+                                                <span style={{ fontWeight: 'bold', color: (value as number) > 0 ? '#4ade80' : '#71717a' }}>
+                                                    +{value as number} pts
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {result.score?.feedback && result.score.feedback.length > 0 && (
+                                        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #27272a' }}>
+                                            <h4 style={{ fontSize: '0.95rem', color: '#f87171', marginBottom: '0.5rem' }}>Improvements Needed:</h4>
+                                            <ul style={{ paddingLeft: '1.2rem', color: '#a1a1aa', fontSize: '0.9rem' }}>
+                                                {result.score.feedback.map((fb: string, i: number) => (
+                                                    <li key={i}>{fb}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+                                        <Link
+                                            href={`/jobs?q=${result.keywords ? encodeURIComponent(result.keywords.join(' ')) : ''}`}
+                                            className={styles.primaryButton}
+                                            style={{ flex: 1, justifyContent: 'center', fontSize: '0.9rem', padding: '0.8rem' }}
+                                        >
+                                            Match with Jobs
+                                        </Link>
+                                        <button
+                                            onClick={() => { setFile(null); setResult(null); }}
+                                            style={{
+                                                padding: '0.8rem',
+                                                borderRadius: '0.5rem',
+                                                border: '1px solid #3f3f46',
+                                                background: 'transparent',
+                                                color: 'white',
+                                                cursor: 'pointer',
+                                                fontSize: '0.9rem'
+                                            }}
+                                        >
+                                            Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {loading ? (
-                        <div className="flex flex-col gap-4">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="glass h-32 rounded-xl animate-pulse"></div>
-                            ))}
-                        </div>
-                    ) : jobs.length === 0 ? (
-                        <div className="glass p-12 rounded-xl text-center text-gray-400">
-                            <Briefcase className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                            <p className="text-lg">No jobs found for this date.</p>
-                            <p className="text-sm mt-2">Try selecting a different date from the calendar.</p>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-4">
-                            {jobs.map((job) => (
-                                <JobCard key={job.id} job={job} />
-                            ))}
+                    {!result && !file && (
+                        <div className={styles.actions}>
+                            <Link href="/jobs" className={styles.primaryButton}>
+                                Browse Jobs <ArrowRight size={18} />
+                            </Link>
                         </div>
                     )}
                 </div>
-            </div>
-        </main>
-    );
-}
+            </main>
 
-// Simple Calendar Component
-function CalendarComponent({
-    selectedDate,
-    onDateSelect,
-    availableDates
-}: {
-    selectedDate: Date,
-    onDateSelect: (d: Date) => void,
-    availableDates: Set<string>
-}) {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
+            <footer className={styles.footer}>
+                <div className={styles.footerContent}>
+                    <div className={styles.capstone}>
+                        Developed as a Capstone Project
+                    </div>
 
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayIndex = firstDay.getDay(); // 0 is Sunday
+                    <div className={styles.centerBlock}>
+                        <div className={styles.copy}>
+                            &copy; {new Date().getFullYear()} Job Cloud. All rights reserved.
+                        </div>
+                    </div>
 
-    const days = [];
-    // Padding for previous month
-    for (let i = 0; i < startingDayIndex; i++) {
-        days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
-    }
-
-    const isSameDay = (d1: Date, d2: Date) =>
-        d1.getDate() === d2.getDate() &&
-        d1.getMonth() === d2.getMonth() &&
-        d1.getFullYear() === d2.getFullYear();
-
-    for (let i = 1; i <= daysInMonth; i++) {
-        const currentPriceDate = new Date(year, month, i);
-        const dateStr = currentPriceDate.toISOString().split("T")[0];
-        const hasJobs = availableDates.has(dateStr);
-        const isSelected = isSameDay(currentPriceDate, selectedDate);
-        const isToday = isSameDay(currentPriceDate, new Date());
-
-        days.push(
-            <div
-                key={i}
-                className={`calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''} ${hasJobs ? 'has-jobs' : ''}`}
-                onClick={() => onDateSelect(currentPriceDate)}
-            >
-                {i}
-            </div>
-        );
-    }
-
-    return (
-        <div>
-            <div className="text-center mb-4 font-medium text-lg">
-                {selectedDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-            </div>
-            <div className="calendar-grid text-gray-400 mb-2 text-xs font-semibold uppercase tracking-wider">
-                <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
-            </div>
-            <div className="calendar-grid">
-                {days}
-            </div>
-        </div>
-    );
-}
-
-function JobCard({ job }: { job: Job }) {
-    return (
-        <div className="glass glass-hover p-6 rounded-xl job-card relative group">
-            <div className="flex justify-between items-start">
-                <div>
-                    <h3 className="text-xl font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">
-                        {job.title}
-                    </h3>
-                    <div className="flex items-center gap-4 text-sm text-gray-300 mb-3">
-                        <span className="flex items-center gap-1">
-                            <Briefcase size={14} /> {job.company}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <MapPin size={14} /> {job.location}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <Globe size={14} /> {job.site}
-                        </span>
+                    <div className={styles.footerLinks}>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms & Conditions</a>
                     </div>
                 </div>
-                <a
-                    href={job.job_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-primary hover:bg-primary-hover text-white p-2 rounded-lg transition-colors"
-                >
-                    <ExternalLink size={20} />
-                </a>
-            </div>
-
-            {/* Optional: Add Description Snippet later if needed */}
+            </footer>
         </div>
     );
 }
