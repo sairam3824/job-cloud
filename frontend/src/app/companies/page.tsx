@@ -22,7 +22,29 @@ type Job = {
     currency?: string;
     interval?: string;
     job_level?: string;
+    company_logo?: string;
 };
+
+const SUGGESTED_ROLES = [
+    "Software Engineer",
+    "Data Scientist",
+    "AI Engineer",
+    "Business Analyst",
+    "Data Analyst",
+    "Cloud Engineer",
+    "Cybersecurity Analyst",
+    "Digital Marketing Specialist",
+    "Quality Assurance Engineer",
+    "Customer Service Representative"
+];
+
+const JOB_TYPES = [
+    "Fulltime",
+    "Contract",
+    "Internship",
+    "Apprentice",
+    "Parttime"
+];
 
 type CompanyGroup = {
     name: string;
@@ -31,6 +53,10 @@ type CompanyGroup = {
 
 export default function CompaniesPage() {
     const [query, setQuery] = useState("");
+    const [jobTitleQuery, setJobTitleQuery] = useState("");
+    const [jobTypeQuery, setJobTypeQuery] = useState("");
+    const [showRoleSuggestions, setShowRoleSuggestions] = useState(false);
+    const [showJobTypeSuggestions, setShowJobTypeSuggestions] = useState(false);
     const [results, setResults] = useState<CompanyGroup[]>([]);
     const [loading, setLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
@@ -39,16 +65,11 @@ export default function CompaniesPage() {
     // Debounce search
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (query.trim()) {
-                searchCompanies(query);
-            } else {
-                setResults([]);
-                setHasSearched(false);
-            }
+            searchCompanies(query, jobTitleQuery, jobTypeQuery);
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [query]);
+    }, [query, jobTitleQuery, jobTypeQuery]);
 
     // Handle ESC key to close modal
     useEffect(() => {
@@ -59,16 +80,29 @@ export default function CompaniesPage() {
         return () => window.removeEventListener('keydown', handleEsc);
     }, []);
 
-    const searchCompanies = async (searchTerm: string) => {
+    const searchCompanies = async (companyName: string, title: string, type: string) => {
         setLoading(true);
         setHasSearched(true);
 
         try {
-            // Search for jobs where company name matches
-            const { data, error } = await supabase
+            // Start query
+            let queryBuilder = supabase
                 .from("jobs")
-                .select("*")
-                .ilike("company", `%${searchTerm}%`)
+                .select("*");
+
+            if (companyName.trim()) {
+                queryBuilder = queryBuilder.ilike("company", `%${companyName}%`);
+            }
+
+            // Add optional filters
+            if (title.trim()) {
+                queryBuilder = queryBuilder.ilike("title", `%${title}%`);
+            }
+            if (type.trim()) {
+                queryBuilder = queryBuilder.ilike("job_type", `%${type}%`);
+            }
+
+            const { data, error } = await queryBuilder
                 .order("crawled_date", { ascending: false })
                 .limit(1000);
 
@@ -78,16 +112,17 @@ export default function CompaniesPage() {
                 // Group by company
                 const groups: Record<string, Job[]> = {};
                 data.forEach(job => {
-                    if (!groups[job.company]) {
-                        groups[job.company] = [];
+                    const company = job.company || "Unknown Company";
+                    if (!groups[company]) {
+                        groups[company] = [];
                     }
-                    groups[job.company].push(job);
+                    groups[company].push(job);
                 });
 
                 const groupArray = Object.keys(groups).map(company => ({
                     name: company,
                     jobs: groups[company]
-                }));
+                })).sort((a, b) => a.name.localeCompare(b.name));
 
                 setResults(groupArray);
             }
@@ -116,71 +151,146 @@ export default function CompaniesPage() {
 
     return (
         <div className={styles.container}>
-            <header className={styles.header}>
-                <h1 className={styles.title}>Company Search</h1>
-                <div className={styles.searchContainer}>
-                    <Search className={styles.searchIcon} size={20} />
-                    <input
-                        type="text"
-                        className={styles.searchInput}
-                        placeholder="Search for a company..."
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        autoFocus
-                    />
-                </div>
-            </header>
-
-            <div className={styles.resultsArea}>
-                {loading ? (
-                    <div className={styles.loadingState}>
-                        Searching...
+            <div className={styles.contentWrapper}>
+                <header className={styles.header}>
+                    <h1 className={styles.title}>Company Search</h1>
+                    <div className={styles.searchContainer}>
+                        <Search className={styles.searchIcon} size={20} />
+                        <input
+                            type="text"
+                            className={styles.searchInput}
+                            placeholder="Search for a company..."
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            autoFocus
+                        />
                     </div>
-                ) : results.length > 0 ? (
-                    results.map((group) => (
-                        <div key={group.name} className={styles.companyGroup}>
-                            <div className={styles.companyHeader}>
-                                <div className={styles.companyName}>
-                                    <Briefcase size={20} color="var(--primary)" />
-                                    {group.name}
-                                </div>
-                                <span className={styles.jobCount}>{group.jobs.length} Jobs Found</span>
-                            </div>
-                            <div className={styles.jobsGrid}>
-                                {group.jobs.map(job => (
+                </header>
+
+                <div className={styles.filtersLine}>
+                    <div className={styles.filterContainer}>
+                        <Briefcase size={16} className={styles.searchIcon} />
+                        <input
+                            type="text"
+                            className={styles.filterInput}
+                            placeholder="Job Title"
+                            value={jobTitleQuery}
+                            onChange={(e) => setJobTitleQuery(e.target.value)}
+                            onFocus={(e) => {
+                                setShowRoleSuggestions(true);
+                                e.target.select();
+                            }}
+                            onBlur={() => setTimeout(() => setShowRoleSuggestions(false), 200)}
+                        />
+                        {showRoleSuggestions && (
+                            <div className={styles.suggestionsPopup}>
+                                {SUGGESTED_ROLES.filter(r => {
+                                    if (SUGGESTED_ROLES.some(role => role.toLowerCase() === jobTitleQuery.toLowerCase())) {
+                                        return true;
+                                    }
+                                    return r.toLowerCase().includes(jobTitleQuery.toLowerCase());
+                                }).map((role) => (
                                     <div
-                                        key={job.id}
-                                        className={styles.jobCard}
-                                        onClick={() => setSelectedJob(job)}
-                                        style={{ cursor: 'pointer' }}
+                                        key={role}
+                                        className={styles.suggestionItem}
+                                        onMouseDown={() => {
+                                            setJobTitleQuery(role);
+                                            setShowRoleSuggestions(false);
+                                        }}
                                     >
-                                        <h3 className={styles.jobTitle}>{job.title}</h3>
-                                        <div className={styles.jobMeta}>
-                                            <div className={styles.metaItem}>
-                                                <MapPin size={14} />
-                                                {job.location}
-                                            </div>
-                                            <div className={styles.metaItem}>
-                                                <Calendar size={14} />
-                                                {job.crawled_date}
-                                            </div>
-                                        </div>
+                                        {role}
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    ))
-                ) : hasSearched && query.trim() ? (
-                    <div className={styles.loadingState}>
-                        No companies found matching "{query}"
+                        )}
                     </div>
-                ) : (
-                    <div className={styles.loadingState}>
-                        Enter a company name to see their history.
+                    <div className={styles.filterContainer}>
+                        <Clock size={16} className={styles.searchIcon} />
+                        <input
+                            type="text"
+                            className={styles.filterInput}
+                            placeholder="Job Type"
+                            value={jobTypeQuery}
+                            onChange={(e) => setJobTypeQuery(e.target.value)}
+                            onFocus={(e) => {
+                                setShowJobTypeSuggestions(true);
+                                e.target.select();
+                            }}
+                            onBlur={() => setTimeout(() => setShowJobTypeSuggestions(false), 200)}
+                        />
+                        {showJobTypeSuggestions && (
+                            <div className={styles.suggestionsPopup}>
+                                {JOB_TYPES.filter(t => {
+                                    if (JOB_TYPES.some(type => type.toLowerCase() === jobTypeQuery.toLowerCase())) {
+                                        return true;
+                                    }
+                                    return t.toLowerCase().includes(jobTypeQuery.toLowerCase());
+                                }).map((type) => (
+                                    <div
+                                        key={type}
+                                        className={styles.suggestionItem}
+                                        onMouseDown={() => {
+                                            setJobTypeQuery(type);
+                                            setShowJobTypeSuggestions(false);
+                                        }}
+                                    >
+                                        {type}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                )}
-            </div>
+                </div>
 
+                <div className={styles.resultsArea}>
+                    {loading ? (
+                        <div className={styles.loadingState}>
+                            Searching, Hold tight...
+                        </div>
+                    ) : results.length > 0 ? (
+                        <div className={styles.logoGrid}>
+                            {results.map((group) => (
+                                <div key={group.name} className={styles.logoItem}>
+                                    {group.jobs[0].company_logo ? (
+                                        <img
+                                            src={group.jobs[0].company_logo}
+                                            alt={`${group.name} logo`}
+                                            className={styles.logoImage}
+                                            onError={(e) => {
+                                                // Fallback if image fails to load
+                                                e.currentTarget.style.display = 'none';
+                                                e.currentTarget.nextElementSibling?.removeAttribute('style'); // Show fallback icon
+                                            }}
+                                        />
+                                    ) : null}
+
+                                    <Briefcase
+                                        size={32}
+                                        className={styles.fallbackIcon}
+                                        style={{ display: group.jobs[0].company_logo ? 'none' : 'block' }} // Hide if logo exists initially
+                                    />
+
+                                    <div className={styles.companyNameTooltip}>
+                                        {group.name}
+                                        <span style={{ opacity: 0.8, marginLeft: '8px', fontWeight: 400, fontSize: '0.75em' }}>
+                                            {group.jobs.length} {group.jobs.length === 1 ? 'Job' : 'Jobs'}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : hasSearched && query.trim() ? (
+                        <div className={styles.loadingState}>
+                            No companies found matching "{query}"
+                        </div>
+                    ) : (
+                        <div className={styles.loadingState}>
+                            Enter a company name to see their history.
+                        </div>
+                    )}
+                </div>
+
+            </div>
             <footer className={styles.footer}>
                 <div className={styles.footerContent}>
                     <div className={styles.capstone}>
@@ -194,8 +304,8 @@ export default function CompaniesPage() {
                     </div>
 
                     <div className={styles.footerLinks}>
-                        <a href="#">Privacy Policy</a>
-                        <a href="#">Terms & Conditions</a>
+                        <Link href="/privacy-policy">Privacy Policy</Link>
+                        <Link href="/terms-conditions">Terms & Conditions</Link>
                     </div>
                 </div>
             </footer>

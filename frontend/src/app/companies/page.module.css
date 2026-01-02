@@ -4,13 +4,20 @@
     flex-direction: column;
     background: var(--background);
     color: var(--foreground);
-    padding: 2rem;
+}
+
+.contentWrapper {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+    padding: 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .header {
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
     text-align: center;
 }
 
@@ -60,8 +67,77 @@
     color: var(--muted);
 }
 
+/* Suggestions Dropdown */
+.suggestionsPopup {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #18181b;
+    border: 1px solid var(--card-border);
+    border-radius: 0.75rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0;
+    z-index: 100;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.suggestionItem {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    color: #e4e4e7;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.suggestionItem:hover {
+    background-color: #27272a;
+    color: white;
+}
+
+/* New Filters Line */
+.filtersLine {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filterContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 9999px;
+    padding: 0.6rem 1.2rem;
+    /* Slightly smaller than main search */
+    width: 250px;
+    transition: all 0.2s ease;
+}
+
+.filterContainer:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.filterInput {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 0.95rem;
+    width: 100%;
+    outline: none;
+}
+
 .resultsArea {
-    margin-top: 3rem;
+    margin-top: 1rem;
     flex: 1;
     width: 100%;
 }
@@ -443,4 +519,78 @@
 
 .footerLinks a:hover {
     color: #e4e4e7;
+}
+
+/* Logo Grid Styles */
+.logoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    width: 100%;
+}
+
+.logoItem {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.logoItem:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.logoImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.logoItem:hover .logoImage {
+    transform: scale(1.1);
+}
+
+.companyNameTooltip {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, bottom 0.2s ease;
+    z-index: 10;
+    font-weight: 600;
+}
+
+.logoItem:hover .companyNameTooltip {
+    opacity: 1;
+    bottom: -35px;
+}
+
+.fallbackIcon {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.logoItem:hover .fallbackIcon {
+    opacity: 1;
+    color: var(--primary);
 }
