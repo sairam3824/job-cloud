@@ -64,6 +64,10 @@ IST = pytz.timezone("Asia/Kolkata")
 ist_now = datetime.now(IST).date().isoformat()
 final["crawled_date"] = ist_now
 
+# Drop duplicates based on job_url to prevent "ON CONFLICT DO UPDATE command cannot affect row a second time"
+if not final.empty:
+    final = final.drop_duplicates(subset=["job_url"])
+
 # ---- Normalize ----
 
 final = final.astype(object).where(pd.notnull(final), None)
