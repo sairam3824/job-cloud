@@ -309,16 +309,38 @@ export default function Home() {
         }
     };
 
+    // Swipe Logic
+    const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    }
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    }
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isRightSwipe = distance < -50;
+
+        if (isRightSwipe) {
+            handleSelectJob(null);
+        }
+    }
+
     return (
         <div className={styles.container}>
             {/* Top Navigation / Search Bar */}
             <header className={styles.header}>
                 <div className={styles.headerContent}>
 
-
                     {/* Search Inputs */}
                     <div className={styles.searchBar}>
-                        {/* Job Search Input */}
+                        {/* ... (keep existing) ... */}
                         <div className={styles.searchInputGroup}>
                             <Search className={styles.searchIcon} size={20} />
                             <input
@@ -623,7 +645,12 @@ export default function Home() {
                 </div>
 
                 {/* Right Column: Job Details (Sticky) */}
-                <div className={`${styles.jobDetails} ${selectedJob ? styles.showOnMobile : ''}`}>
+                <div
+                    className={`${styles.jobDetails} ${selectedJob ? styles.showOnMobile : ''}`}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                >
                     {selectedJob ? (
                         <div className={styles.detailsContainer}>
                             {/* Job Header */}
