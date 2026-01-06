@@ -13,27 +13,16 @@ load_dotenv()
 url = os.environ.get("SUPABASE_URL")
 key = os.environ.get("SUPABASE_KEY")
 
-cities = {
-    "Mumbai": "Mumbai, Maharashtra, India",
-    "Chennai": "Chennai, Tamil Nadu, India",
-    "Hyderabad": "Hyderabad, Telangana, India",
-    "Bengaluru": "Bengaluru, Karnataka, India",
-    "Pune": "Pune, Maharashtra, India",
-    "Kolkata": "Kolkata, West Bengal, India"
-}
-
-roles = [
-    "software engineer",
-    "data scientist",
-    "ai engineer",
-    "business analyst",
-    "data analyst",
-    "cloud engineer",
-    "cybersecurity analyst",
-    "digital marketing specialist",
-    "quality assurance engineer",
-    "customer service representative"
-]
+# Load configuration from JSON file
+try:
+    with open("scraper_config.json", "r") as f:
+        config = json.load(f)
+        cities = config.get("cities", {})
+        roles = config.get("roles", [])
+except FileNotFoundError:
+    print("Error: scraper_config.json not found.")
+    cities = {}
+    roles = []
 frames = []
 print("Scraping started:", date.today())
 

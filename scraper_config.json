@@ -1,0 +1,22 @@
+{
+    "cities": {
+        "Mumbai": "Mumbai, Maharashtra, India",
+        "Chennai": "Chennai, Tamil Nadu, India",
+        "Hyderabad": "Hyderabad, Telangana, India",
+        "Bengaluru": "Bengaluru, Karnataka, India",
+        "Pune": "Pune, Maharashtra, India",
+        "Kolkata": "Kolkata, West Bengal, India"
+    },
+    "roles": [
+        "software engineer",
+        "data scientist",
+        "ai engineer",
+        "business analyst",
+        "data analyst",
+        "cloud engineer",
+        "cybersecurity analyst",
+        "digital marketing specialist",
+        "quality assurance engineer",
+        "customer service representative"
+    ]
+}
