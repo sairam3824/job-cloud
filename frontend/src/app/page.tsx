@@ -128,54 +128,31 @@ export default function Home() {
 
                     {/* Center Column: Resume Parser */}
                     <div className={styles.centerColumn}>
-                        <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                            <div style={{
-                                width: '80px', height: '80px', background: 'rgba(37, 99, 235, 0.1)',
-                                borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                border: '1px solid rgba(37, 99, 235, 0.2)', margin: '0 auto 1.5rem auto'
-                            }}>
+                        <div className={styles.centerHeader}>
+                            <div className={styles.iconWrapper}>
                                 <FileText size={40} color="var(--primary)" />
                             </div>
-                            <h1 style={{ fontSize: 'clamp(2rem, 5vw, 2.5rem)', fontWeight: 800, color: 'white', marginBottom: '1rem' }}>Resume Parser</h1>
-                            <p style={{ color: '#a1a1aa', maxWidth: '400px', margin: '0 auto', lineHeight: '1.6' }}>
+                            <h1 className={styles.centerTitle}>Resume Parser</h1>
+                            <p className={styles.centerDescription}>
                                 Upload your resume to evaluate its ATS score and match with job opportunities.
                             </p>
                         </div>
 
                         {!result ? (
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: '1.5rem',
-                                width: '100%',
-                            }}>
+                            <div className={styles.uploadArea}>
                                 <input
                                     type="file"
                                     accept=".pdf"
                                     onChange={handleFileChange}
-                                    style={{ display: 'none' }}
+                                    className={styles.uploadInput}
                                     id="resume-upload"
                                 />
                                 <label
                                     htmlFor="resume-upload"
-                                    style={{
-                                        cursor: 'pointer',
-                                        padding: '2.5rem 2rem',
-                                        border: '2px dashed #3f3f46',
-                                        borderRadius: '16px',
-                                        width: '100%',
-                                        textAlign: 'center',
-                                        background: 'rgba(255, 255, 255, 0.02)',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        gap: '1rem',
-                                        transition: 'all 0.2s ease'
-                                    }}
+                                    className={styles.uploadLabel}
                                 >
                                     <Upload size={40} className="text-gray-400" />
-                                    <span style={{ fontSize: '1.1rem', fontWeight: 500, color: 'white' }}>
+                                    <span className={styles.uploadText}>
                                         {file ? file.name : "Click to Upload Resume (PDF)"}
                                     </span>
                                 </label>
@@ -184,8 +161,7 @@ export default function Home() {
                                     <button
                                         onClick={handleUpload}
                                         disabled={loading}
-                                        className={styles.primaryButton}
-                                        style={{ width: '100%', justifyContent: 'center' }}
+                                        className={`${styles.primaryButton} ${styles.analyzeButton}`}
                                     >
                                         {loading ? (
                                             <>
@@ -198,85 +174,49 @@ export default function Home() {
                                 )}
 
                                 {loading && (
-                                    <p style={{ fontSize: '0.9rem', color: '#e4e4e7', textAlign: 'center', marginTop: '0.5rem', opacity: 0.9 }}>
+                                    <p className={styles.loadingText}>
                                         Processing your resume… Results may take up to 2 minutes. (Beta Version)
                                     </p>
                                 )}
                                 {error && (
-                                    <div style={{
-                                        color: '#ef4444',
-                                        marginTop: '0.5rem',
-                                        background: 'rgba(239, 68, 68, 0.1)',
-                                        padding: '1rem',
-                                        borderRadius: '8px',
-                                        fontSize: '0.9rem',
-                                        width: '100%',
-                                        textAlign: 'center'
-                                    }}>
-                                        <AlertCircle size={16} style={{ display: 'inline', marginRight: '5px', verticalAlign: 'text-bottom' }} />
+                                    <div className={styles.errorBox}>
+                                        <AlertCircle size={16} className={styles.errorIcon} />
                                         {error}
                                     </div>
                                 )}
                             </div>
                         ) : (
-                            <div style={{
-                                width: '100%',
-                                display: 'grid',
-                                gap: '1.5rem',
-                            }}>
+                            <div className={styles.resultsContainer}>
                                 {/* Score Card */}
-                                <div style={{
-                                    background: '#18181b',
-                                    padding: '2rem',
-                                    borderRadius: '16px',
-                                    border: '1px solid #27272a',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    textAlign: 'center'
-                                }}>
-                                    <h3 style={{ fontSize: '1.1rem', color: '#a1a1aa', marginBottom: '1rem' }}>ATS Match Score</h3>
-                                    <div style={{
-                                        width: '120px',
-                                        height: '120px',
-                                        borderRadius: '50%',
-                                        border: `8px solid ${result.score?.totalScore > 70 ? '#22c55e' : result.score?.totalScore > 40 ? '#eab308' : '#ef4444'}`,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontWeight: 'bold',
-                                        color: '#fff',
-                                        marginBottom: '1rem'
-                                    }}>
-                                        <span style={{ fontSize: '2.5rem', lineHeight: '1' }}>{result.score?.totalScore || 0}</span>
-                                        <span style={{ fontSize: '0.8rem', color: '#a1a1aa', marginTop: '4px' }}>± 5</span>
+                                <div className={styles.scoreCard}>
+                                    <h3 className={styles.scoreCardTitle}>ATS Match Score</h3>
+                                    <div
+                                        className={styles.scoreCircle}
+                                        style={{
+                                            border: `8px solid ${result.score?.totalScore > 70 ? '#22c55e' : result.score?.totalScore > 40 ? '#eab308' : '#ef4444'}`,
+                                        }}>
+                                        <span className={styles.scoreValue}>{result.score?.totalScore || 0}</span>
+                                        <span className={styles.scoreDeviation}>± 5</span>
                                     </div>
-                                    <p style={{ fontSize: '0.9rem', color: '#71717a' }}>
+                                    <p className={styles.scoreMessage}>
                                         {result.score?.totalScore > 70 ? 'Excellent! Your resume is well-optimized.' :
                                             result.score?.totalScore > 40 ? 'Good start, but needs improvement.' : 'Needs significant updates.'}
                                     </p>
                                 </div>
 
                                 {/* Details Card */}
-                                <div style={{
-                                    background: '#18181b',
-                                    padding: '1.5rem',
-                                    borderRadius: '16px',
-                                    border: '1px solid #27272a'
-                                }}>
-                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <div className={styles.detailsCard}>
+                                    <h3 className={styles.detailsHeader}>
                                         <Award size={20} className="text-blue-400" /> Score Breakdown
                                     </h3>
 
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div className={styles.breakdownList}>
                                         {result.score?.breakdown && Object.entries(result.score.breakdown).map(([key, value]) => (
-                                            <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                                                <span style={{ textTransform: 'capitalize', color: '#d4d4d8' }}>
+                                            <div key={key} className={styles.breakdownItem}>
+                                                <span className={styles.breakdownLabel}>
                                                     {key.replace(/([A-Z])/g, ' $1').trim()}
                                                 </span>
-                                                <span style={{ fontWeight: 'bold', color: (value as number) > 0 ? '#4ade80' : '#71717a' }}>
+                                                <span className={`${styles.breakdownValue} ${(value as number) > 0 ? styles.breakdownValuePositive : ''}`}>
                                                     +{value as number} pts
                                                 </span>
                                             </div>
@@ -284,9 +224,9 @@ export default function Home() {
                                     </div>
 
                                     {result.score?.feedback && result.score.feedback.length > 0 && (
-                                        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #27272a' }}>
-                                            <h4 style={{ fontSize: '0.95rem', color: '#f87171', marginBottom: '0.5rem' }}>Improvements Needed:</h4>
-                                            <ul style={{ paddingLeft: '1.2rem', color: '#a1a1aa', fontSize: '0.9rem' }}>
+                                        <div className={styles.feedbackSection}>
+                                            <h4 className={styles.feedbackHeader}>Improvements Needed:</h4>
+                                            <ul className={styles.feedbackList}>
                                                 {result.score.feedback.map((fb: string, i: number) => (
                                                     <li key={i}>{fb}</li>
                                                 ))}
@@ -294,25 +234,16 @@ export default function Home() {
                                         </div>
                                     )}
 
-                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+                                    <div className={styles.resultActions}>
                                         <button
                                             onClick={handleMatchJobs}
-                                            className={styles.primaryButton}
-                                            style={{ flex: 1, justifyContent: 'center', fontSize: '0.9rem', padding: '0.8rem', border: 'none', cursor: 'pointer' }}
+                                            className={`${styles.primaryButton} ${styles.matchButton}`}
                                         >
                                             Match with Jobs
                                         </button>
                                         <button
                                             onClick={() => { setFile(null); setResult(null); }}
-                                            style={{
-                                                padding: '0.8rem',
-                                                borderRadius: '0.5rem',
-                                                border: '1px solid #3f3f46',
-                                                background: 'transparent',
-                                                color: 'white',
-                                                cursor: 'pointer',
-                                                fontSize: '0.9rem'
-                                            }}
+                                            className={styles.resetButton}
                                         >
                                             Reset
                                         </button>
@@ -356,47 +287,26 @@ export default function Home() {
             </footer>
 
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{
-                        width: '60px',
-                        height: '60px',
-                        background: 'rgba(234, 179, 8, 0.1)',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginBottom: '1.5rem',
-                        color: '#eab308'
-                    }}>
+                <div className={styles.modalContent}>
+                    <div className={styles.modalIconWrapper}>
                         <Construction size={32} />
                     </div>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white', marginBottom: '0.75rem' }}>
+                    <h2 className={styles.modalTitle}>
                         Feature Coming Soon
                     </h2>
-                    <p style={{ color: '#a1a1aa', fontSize: '1rem', lineHeight: '1.6', marginBottom: '2rem' }}>
+                    <p className={styles.modalText}>
                         The AI Job Matching feature is currently under construction. In the meantime, you can browse all available jobs manually.
                     </p>
-                    <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+                    <div className={styles.modalActions}>
                         <button
                             onClick={() => router.push('/jobs')}
-                            className={styles.primaryButton}
-                            style={{ flex: 1, justifyContent: 'center', border: 'none', cursor: 'pointer' }}
+                            className={`${styles.primaryButton} ${styles.modalBrowseButton}`}
                         >
                             Browse Jobs
                         </button>
                         <button
                             onClick={() => setIsModalOpen(false)}
-                            style={{
-                                background: 'transparent',
-                                border: '1px solid #3f3f46',
-                                color: '#e4e4e7',
-                                padding: '0.75rem 1.5rem',
-                                borderRadius: '8px',
-                                fontWeight: 500,
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                flex: 1
-                            }}
+                            className={styles.modalCloseButton}
                         >
                             Close
                         </button>
