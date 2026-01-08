@@ -7,6 +7,7 @@ HireMind is a modern, responsive job board application designed to connect job s
 - **Job Browsing**: Explore a wide range of job listings with filtering options (Job Title, Type, Location, etc.).
 - **Company Insights**: View detailed profiles for hiring companies.
 - **Resume Matching**: (Beta) Upload your resume to find jobs that match your profile using our matching algorithm.
+- **Anonymous Feedback**: Suggest new roles or locations and provide general feedback anonymously.
 - **Responsive Design**: Optimized for both desktop and mobile devices.
 - **Modern UI**: Built with a focus on aesthetics and user experience using generic colors and animations.
 - **Supabase Integration**: Real-time data fetching and secure storage.
@@ -73,6 +74,15 @@ HireMind is a modern, responsive job board application designed to connect job s
     python run_jobs_supabase.py
     ```
 
+    **Configuration:**
+    The job scraper can be configured using `scraper_config.json`. You can modify the list of cities and roles to scrape:
+    ```json
+    {
+      "cities": { ... },
+      "roles": [ ... ]
+    }
+    ```
+
     **Resume Matcher Service:**
     The resume matching service is containerized and currently deployed on AWS.
 
@@ -82,6 +92,15 @@ HireMind is a modern, responsive job board application designed to connect job s
     docker build -t resume-matcher .
     docker run -p 8000:8000 resume-matcher
     ```
+
+## Deployment
+
+### Frontend
+The frontend is designed to be deployed on [Vercel](https://vercel.com/):
+1.  Push your code to a Git repository.
+2.  Import the project into Vercel.
+3.  Set the Environment Variables (`NEXT_PUBLIC_SUPABASE_URL`, etc.).
+4.  Deploy.
 
 ## Contributing
 
