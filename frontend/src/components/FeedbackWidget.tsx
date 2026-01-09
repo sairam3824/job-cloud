@@ -66,7 +66,7 @@ export default function FeedbackWidget({ className = "" }: { className?: string 
                 aria-label="Open feedback form"
             >
                 <MessageSquarePlus size={18} />
-                <span>Feedback</span>
+                <span>Feedback & Suggestions</span>
             </button>
 
             {isOpen && mounted && createPortal(
