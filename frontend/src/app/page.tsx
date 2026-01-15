@@ -175,7 +175,7 @@ export default function Home() {
 
                                 {loading && (
                                     <p className={styles.loadingText}>
-                                        Processing your resume… Results may take up to 2 minutes. (Beta Version)
+                                        Processing your resume… Results may take up to a minutes. (Beta Version)
                                     </p>
                                 )}
                                 {error && (
