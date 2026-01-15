@@ -43,7 +43,16 @@ export default function CompanyJobsPage() {
                 .order('crawled_date', { ascending: false })
 
             if (error) throw error
-            setJobs(data || [])
+
+            // Deduplicate jobs by job_url, keeping the most recent one (since data is ordered by crawled_date desc)
+            const uniqueJobs = new Map()
+            data?.forEach(job => {
+                if (!uniqueJobs.has(job.job_url)) {
+                    uniqueJobs.set(job.job_url, job)
+                }
+            })
+
+            setJobs(Array.from(uniqueJobs.values()) || [])
         } catch (error) {
             console.error('Error fetching jobs:', error)
         } finally {
