@@ -1,0 +1,166 @@
+.container {
+    min-height: 100vh;
+    padding: 2rem;
+    background: var(--background);
+}
+
+.header {
+    max-width: 1200px;
+    margin: 0 auto 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--foreground);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.backLink {
+    text-decoration: none;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.backLink:hover {
+    color: var(--foreground);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+}
+
+.card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    background: var(--card-hover);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.jobTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+    color: var(--foreground);
+}
+
+.company {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin: 0.25rem 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--card-border);
+}
+
+.tag {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.5rem;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.applyButton {
+    flex: 1;
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-weight: 500;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.applyButton:hover {
+    background: var(--primary-hover);
+}
+
+.removeButton {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: #ef4444;
+    /* Red */
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.removeButton:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--muted);
+    grid-column: 1 / -1;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    color: var(--muted);
+}
