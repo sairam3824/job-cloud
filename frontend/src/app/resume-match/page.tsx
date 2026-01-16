@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 import { ArrowLeft, Briefcase, ExternalLink, MapPin, Clock, Star, AlertCircle, RefreshCw } from "lucide-react"; // Import necessary icons
 import ResumeUpload from "@/features/resume/components/ResumeUpload";
 import ReactMarkdown from 'react-markdown'; // Ensure this is installed or use simple text rendering
@@ -25,6 +27,21 @@ type Job = {
 };
 
 export default function ResumeMatchPage() {
+    const { user, loading: authLoading } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!authLoading && !user) {
+            router.push('/login?redirect=/resume-match');
+        }
+    }, [user, authLoading, router]);
+
+    if (authLoading) {
+        return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-gray-400">Loading...</div>;
+    }
+
+    if (!user) return null; // Prevent flash
+
     const [keywords, setKeywords] = useState<string[] | null>(null);
     const [matchedJobs, setMatchedJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(false);
