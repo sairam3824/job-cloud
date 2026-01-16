@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Send, Loader2, MessageSquarePlus } from 'lucide-react';
+import { X, Send, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import styles from './FeedbackWidget.module.css';
 
@@ -65,7 +65,6 @@ export default function FeedbackWidget({ className = "" }: { className?: string 
                 className={`${styles.triggerButton} ${className}`}
                 aria-label="Open feedback form"
             >
-                <MessageSquarePlus size={18} />
                 <span>Feedback & Suggestions</span>
             </button>
 

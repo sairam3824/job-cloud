@@ -9,8 +9,8 @@
     background: transparent;
     border: none;
     color: var(--muted);
-    font-size: 0.875rem;
-    /* 14px */
+    font-size: 1rem;
+    /* 16px */
     font-weight: 500;
     cursor: pointer;
     padding: 0.5rem 0.75rem;
