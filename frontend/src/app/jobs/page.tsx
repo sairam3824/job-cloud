@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import ReactMarkdown from 'react-markdown';
 import {
@@ -19,7 +20,8 @@ import {
     Layers,
     RefreshCw,
     Share2,
-    CheckCircle
+    CheckCircle,
+    Bookmark
 } from "lucide-react";
 import styles from "./page.module.css";
 import Calendar from "@/components/Calendar";
@@ -98,13 +100,66 @@ const JOB_LEVELS = [
     "Executive"
 ];
 
+import { useAuth } from "@/context/AuthContext";
+
 export default function Home() {
     // State
+    const { user } = useAuth();
+    const router = useRouter();
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(false);
     const [availableDates, setAvailableDates] = useState<Set<string>>(new Set());
     const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+    const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
+    const [saving, setSaving] = useState(false);
+
+    // Fetch saved jobs
+    useEffect(() => {
+        const fetchSaved = async () => {
+            if (!user) {
+                setSavedJobIds(new Set());
+                return;
+            }
+            const { data } = await supabase.from('saved_jobs').select('job_id').eq('user_id', user.id);
+            if (data) {
+                setSavedJobIds(new Set(data.map(d => d.job_id)));
+            }
+        };
+        fetchSaved();
+    }, [user]);
+
+    const handleToggleSave = async (jobId: string) => {
+        if (!user) {
+            router.push('/login?redirect=/jobs');
+            return;
+        }
+        if (saving) return;
+        setSaving(true);
+
+        const isSaved = savedJobIds.has(jobId);
+
+        if (isSaved) {
+            const { error } = await supabase.from('saved_jobs').delete().match({ user_id: user.id, job_id: jobId });
+            if (!error) {
+                setSavedJobIds(prev => {
+                    const next = new Set(prev);
+                    next.delete(jobId);
+                    return next;
+                });
+            }
+        } else {
+            const { error } = await supabase.from('saved_jobs').insert({ user_id: user.id, job_id: jobId });
+            if (!error) {
+                setSavedJobIds(prev => {
+                    const next = new Set(prev);
+                    next.add(jobId);
+                    return next;
+                });
+            }
+        }
+        setSaving(false);
+    };
 
     // URL Handling
     useEffect(() => {
@@ -179,6 +234,24 @@ export default function Home() {
     useEffect(() => {
         async function fetchDates() {
             try {
+                // First get the most recent date from the DB
+                const { data: recentDateData, error: recentError } = await supabase
+                    .from("jobs")
+                    .select("crawled_date")
+                    .order("crawled_date", { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (recentDateData) {
+                    const latestDate = new Date(recentDateData.crawled_date);
+                    setSelectedDate(latestDate);
+                    fetchJobs(latestDate);
+                } else {
+                    // Fallback to today if no jobs found
+                    fetchJobs(new Date());
+                }
+
+                // Initial fetch logic to populate the calendar
                 let allDates: string[] = [];
                 let from = 0;
                 const batchSize = 1000;
@@ -211,10 +284,10 @@ export default function Home() {
                 }
             } catch (e) {
                 console.error("Error fetching dates", e);
+                fetchJobs(new Date()); // Fallback on error
             }
         }
         fetchDates();
-        fetchJobs(new Date());
     }, []);
 
     const fetchJobs = async (date: Date) => {
@@ -331,6 +404,16 @@ export default function Home() {
             handleSelectJob(null);
         }
     }
+
+    const handleApply = (e: React.MouseEvent, url: string) => {
+        e.preventDefault();
+        if (!user) {
+            const returnUrl = encodeURIComponent(window.location.href);
+            router.push(`/login?redirect=${returnUrl}`);
+        } else {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+    };
 
     return (
         <div className={styles.container}>
@@ -691,8 +774,7 @@ export default function Home() {
                                     {selectedJob.job_url_direct && selectedJob.job_url_direct !== 'NULL' && (
                                         <a
                                             href={selectedJob.job_url_direct}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                            onClick={(e) => handleApply(e, selectedJob.job_url_direct!)}
                                             className={styles.applyButton}
                                         >
                                             Apply Direct
@@ -701,8 +783,7 @@ export default function Home() {
                                     )}
                                     <a
                                         href={selectedJob.job_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                        onClick={(e) => handleApply(e, selectedJob.job_url)}
                                         className={
                                             (selectedJob.job_url_direct && selectedJob.job_url_direct !== 'NULL')
                                                 ? styles.saveButton
@@ -712,6 +793,17 @@ export default function Home() {
                                         {selectedJob.site ? `Apply on ${selectedJob.site}` : "Apply now"}
                                         <ExternalLink size={18} />
                                     </a>
+                                    <button
+                                        onClick={() => handleToggleSave(selectedJob.id)}
+                                        className={styles.shareButton}
+                                        title={savedJobIds.has(selectedJob.id) ? "Unsave Job" : "Save Job"}
+                                    >
+                                        <Bookmark
+                                            size={18}
+                                            fill={savedJobIds.has(selectedJob.id) ? "currentColor" : "none"}
+                                            color={savedJobIds.has(selectedJob.id) ? "#3b82f6" : "currentColor"}
+                                        />
+                                    </button>
                                     <div style={{ position: 'relative' }}>
                                         <button
                                             onClick={handleShare}
