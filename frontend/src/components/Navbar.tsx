@@ -1,17 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Briefcase, Menu, X, LogIn, UserPlus, LogOut } from "lucide-react";
+import {
+    Briefcase,
+    Menu,
+    X,
+    LogOut,
+    User,
+    Settings
+} from "lucide-react";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import { useAuth } from "@/context/AuthContext";
 import styles from "./Navbar.module.css";
 
 export default function Navbar() {
     const pathname = usePathname();
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user, signOut } = useAuth();
+
+    // UI State
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+
+    // Refs for clicking outside
+    const profileRef = useRef<HTMLDivElement>(null);
+
+
+    // Close dropdowns on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+                setIsProfileOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const isActive = (path: string) => {
         if (path === "/" && pathname === "/") return true;
@@ -22,12 +49,13 @@ export default function Navbar() {
     return (
         <nav className={styles.navbar}>
             <div className={styles.navContainer}>
+                {/* Logo */}
                 <Link href="/" className={styles.logo}>
-                    <Briefcase size={24} color="#2563eb" />
+                    <Briefcase size={24} color="#60a5fa" />
                     <span>HireMind</span>
                 </Link>
 
-                {/* Mobile Menu Toggle */}
+                {/* Mobile Toggle */}
                 <button
                     className={styles.mobileMenuToggle}
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -36,7 +64,7 @@ export default function Navbar() {
                     {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
 
-                {/* Desktop Nav */}
+                {/* Desktop Navigation */}
                 <div className={styles.navLinks}>
                     <Link
                         href="/"
@@ -57,111 +85,184 @@ export default function Navbar() {
                         Companies
                     </Link>
 
-                    {/* Saved Jobs - Only if logged in? Or always? Let's show always for now or redirect if not auth */}
+                    {/* Saved Links (Only if logged in) */}
                     {user && (
-                        <Link
-                            href="/saved-jobs"
-                            className={`${styles.navLink} ${isActive("/saved-jobs") ? styles.active : ""}`}
-                        >
-                            Saved
-                        </Link>
+                        <>
+                            <Link
+                                href="/saved-jobs"
+                                className={`${styles.navLink} ${isActive("/saved-jobs") ? styles.active : ""}`}
+                            >
+                                Saved Jobs
+                            </Link>
+                            <Link
+                                href="/saved-companies"
+                                className={`${styles.navLink} ${isActive("/saved-companies") ? styles.active : ""}`}
+                            >
+                                Saved Companies
+                            </Link>
+                        </>
                     )}
+                </div>
 
+                {/* Right Side Actions */}
+                <div className={styles.rightActions}>
                     <div className={styles.feedbackWrapper}>
                         <FeedbackWidget />
                     </div>
 
-                    {/* Auth Section */}
-                    <div className={styles.authSection}>
-                        {user ? (
-                            <div className={styles.authGroup}>
-                                <span className={styles.userEmail}>{user.email?.split('@')[0]}</span>
-                                <button onClick={signOut} className={styles.logoutBtn}>
-                                    Logout
-                                </button>
-                            </div>
-                        ) : (
-                            <div className={styles.authGroup}>
-                                <Link href="/login" className={styles.navLink}>
-                                    Login
-                                </Link>
-                                <Link href="/signup" className={styles.signupBtn}>
-                                    Sign Up
-                                </Link>
-                            </div>
-                        )}
-                    </div>
+                    {user ? (
+                        <div
+                            className={styles.profileWrapper}
+                            ref={profileRef}
+                            style={{ position: 'relative' }}
+                        >
+                            <button
+                                className={`${styles.userMenuTrigger} ${isProfileOpen ? styles.open : ''}`}
+                                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                title="Account Menu"
+                            >
+                                <User size={20} />
+                            </button>
+
+                            {isProfileOpen && (
+                                <div className={styles.dropdownMenu}>
+                                    <div className={styles.userInfo}>
+                                        <small>Signed in as</small>
+                                        <strong>{user.email}</strong>
+                                    </div>
+
+                                    <Link
+                                        href="/profile"
+                                        className={styles.dropdownItem}
+                                        onClick={() => setIsProfileOpen(false)}
+                                    >
+                                        <User size={16} /> My Profile
+                                    </Link>
+
+                                    <Link
+                                        href="/applied-jobs"
+                                        className={styles.dropdownItem}
+                                        onClick={() => setIsProfileOpen(false)}
+                                    >
+                                        <Briefcase size={16} /> Applied Jobs
+                                    </Link>
+
+                                    <div className={styles.dropdownDivider} />
+
+                                    <button
+                                        onClick={() => {
+                                            signOut();
+                                            setIsProfileOpen(false);
+                                        }}
+                                        className={`${styles.dropdownItem} ${styles.danger}`}
+                                    >
+                                        <LogOut size={16} /> Logout
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className={styles.authButtons}>
+                            <Link href="/login" className={styles.loginLink}>
+                                Login
+                            </Link>
+                            <Link href="/signup" className={styles.signupButton}>
+                                Sign Up
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Mobile Nav Overlay */}
+            {/* Mobile Menu Overlay */}
             {isMobileMenuOpen && (
                 <div className={styles.mobileMenu}>
                     <Link
                         href="/"
-                        className={`${styles.mobileNavLink} ${isActive("/") ? styles.active : ""}`}
+                        className={`${styles.mobileLink} ${isActive("/") ? styles.active : ""}`}
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
                         Resume Match
                     </Link>
                     <Link
                         href="/jobs"
-                        className={`${styles.mobileNavLink} ${isActive("/jobs") ? styles.active : ""}`}
+                        className={`${styles.mobileLink} ${isActive("/jobs") ? styles.active : ""}`}
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
                         Jobs
                     </Link>
                     <Link
                         href="/companies"
-                        className={`${styles.mobileNavLink} ${isActive("/companies") ? styles.active : ""}`}
+                        className={`${styles.mobileLink} ${isActive("/companies") ? styles.active : ""}`}
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
                         Companies
                     </Link>
+
                     {user && (
-                        <Link
-                            href="/saved-jobs"
-                            className={`${styles.mobileNavLink} ${isActive("/saved-jobs") ? styles.active : ""}`}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                            Saved
-                        </Link>
+                        <>
+                            <Link
+                                href="/saved-jobs"
+                                className={`${styles.mobileLink} ${isActive("/saved-jobs") ? styles.active : ""}`}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Saved Jobs
+                            </Link>
+                            <Link
+                                href="/saved-companies"
+                                className={`${styles.mobileLink} ${isActive("/saved-companies") ? styles.active : ""}`}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Saved Companies
+                            </Link>
+                            <Link
+                                href="/applied-jobs"
+                                className={`${styles.mobileLink} ${isActive("/applied-jobs") ? styles.active : ""}`}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Applied Jobs
+                            </Link>
+                        </>
                     )}
 
-                    <div className={styles.mobileSection}>
-                        <FeedbackWidget className={styles.mobileNavLink} />
+                    <div style={{ padding: '1rem 0' }}>
+                        <FeedbackWidget />
                     </div>
 
-                    <div className={styles.mobileSection}>
-                        {user ? (
-                            <div className={styles.mobileAuthButtons}>
-                                <span className={styles.userEmailMobile}>{user.email}</span>
-                                <button
-                                    onClick={() => { signOut(); setIsMobileMenuOpen(false); }}
-                                    className={`${styles.mobileNavLink} ${styles.logoutBtnMobile}`}
-                                >
-                                    Logout
-                                </button>
-                            </div>
-                        ) : (
-                            <div className={styles.mobileAuthButtons}>
-                                <Link
-                                    href="/login"
-                                    className={styles.mobileNavLink}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    Login
-                                </Link>
-                                <Link
-                                    href="/signup"
-                                    className={`${styles.mobileNavLink} ${styles.signupBtnMobile}`}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    Sign Up
-                                </Link>
-                            </div>
-                        )}
-                    </div>
+                    {user ? (
+                        <div className={styles.mobileAuth}>
+                            <Link
+                                href="/profile"
+                                className={styles.mobileLink}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                My Profile ({user.email?.split('@')[0]})
+                            </Link>
+                            <button
+                                onClick={() => { signOut(); setIsMobileMenuOpen(false); }}
+                                className={styles.logoutBtnMobile}
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    ) : (
+                        <div className={styles.mobileAuth}>
+                            <Link
+                                href="/login"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                style={{ textAlign: 'center', width: '100%', display: 'block', padding: '1rem', color: 'white', fontWeight: 600 }}
+                            >
+                                Login
+                            </Link>
+                            <Link
+                                href="/signup"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                style={{ textAlign: 'center', width: '100%', display: 'block', padding: '1rem', background: 'white', color: 'black', borderRadius: '12px', fontWeight: 600 }}
+                            >
+                                Sign Up
+                            </Link>
+                        </div>
+                    )}
                 </div>
             )}
         </nav>
