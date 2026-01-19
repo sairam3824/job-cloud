@@ -9,7 +9,7 @@
 /* Header */
 .header {
   position: sticky;
-  top: 0;
+  top: 110px;
   z-index: 50;
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(12px);
@@ -550,9 +550,9 @@
   .jobDetails {
     display: block;
     position: sticky;
-    top: 6rem;
+    top: 14rem;
     /* Header height + gap */
-    height: calc(100vh - 7.5rem);
+    height: calc(100vh - 15rem);
   }
 }
 

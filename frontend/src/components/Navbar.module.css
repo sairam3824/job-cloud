@@ -28,6 +28,14 @@
     -webkit-backdrop-filter: blur(16px);
 }
 
+.navSpacer {
+    height: 140px;
+    /* 2rem (32px) + 72px + spacing */
+    width: 100%;
+    display: block;
+    flex-shrink: 0;
+}
+
 /* Logo */
 .logo {
     display: flex;

@@ -14,7 +14,7 @@
     border-bottom: 1px solid var(--card-border);
     padding: 1.5rem;
     position: sticky;
-    top: 0;
+    top: 110px;
     z-index: 50;
 }
 
@@ -197,9 +197,9 @@
     .jobDetails {
         display: block;
         position: sticky;
-        top: 8rem;
+        top: 15rem;
         /* Adjusted for header height */
-        height: calc(100vh - 9rem);
+        height: calc(100vh - 16rem);
     }
 }
 

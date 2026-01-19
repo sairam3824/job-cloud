@@ -58,6 +58,11 @@ export default function AppliedJobsPage() {
             .select(`
                 id,
                 applied_at,
+                job_id,
+                job_title,
+                company_name,
+                location,
+                job_url,
                 job:jobs (
                     id,
                     title,
@@ -75,12 +80,31 @@ export default function AppliedJobsPage() {
         if (error) {
             console.error('Error fetching applied jobs:', error);
         } else {
-            // Filter out any where job is null (deleted)
-            const validItems = (data || []).map(item => ({
-                ...item,
-                created_at: item.applied_at // Map applied_at to created_at for reuse of type
-            })).filter(item => item.job !== null) as unknown as SavedJobItem[];
-            setAppliedJobs(validItems);
+            // Map data, using snapshot if live job is missing (deleted)
+            const mappedItems = (data || []).map((item: any) => {
+                const liveJob = item.job;
+
+                // Construct job object from snapshot if live job is not available
+                // or if we want to preserve the snapshot state
+                const jobData = liveJob || {
+                    id: item.job_id,
+                    title: item.job_title || 'Unknown Title',
+                    company: item.company_name || 'Unknown Company',
+                    location: item.location || 'Unknown Location',
+                    job_url: item.job_url || '#',
+                    crawled_date: item.applied_at,
+                    job_type: 'N/A', // Not stored in snapshot currently
+                    site: 'N/A'
+                };
+
+                return {
+                    id: item.id,
+                    created_at: item.applied_at,
+                    job: jobData
+                };
+            });
+
+            setAppliedJobs(mappedItems);
         }
         setLoading(false);
     };
