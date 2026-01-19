@@ -1,8 +1,9 @@
 .container {
     min-height: 100vh;
-    padding: 4rem 2rem;
-    background: #0f172a;
-    color: #f8fafc;
+    padding: 0;
+    /* Let layout handle padding */
+    background: #000000;
+    color: #f4f4f5;
     font-family: 'Inter', sans-serif;
 }
 
@@ -14,7 +15,7 @@
 .title {
     font-size: 2.5rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+    background: linear-gradient(to right, #fff, #a1a1aa);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -22,7 +23,7 @@
 }
 
 .subtitle {
-    color: #94a3b8;
+    color: #a1a1aa;
     font-size: 1rem;
 }
 
@@ -30,9 +31,9 @@
 .tableContainer {
     width: 100%;
     overflow-x: auto;
-    background: #1e293b;
+    background: #121212;
     border-radius: 12px;
-    border: 1px solid #334155;
+    border: 1px solid #27272a;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
@@ -41,30 +42,29 @@
     border-collapse: collapse;
     text-align: left;
     min-width: 800px;
-    /* Ensure table doesn't get too squeezed on small screens */
 }
 
 .table th,
 .table td {
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid #334155;
-    color: #e2e8f0;
+    border-bottom: 1px solid #27272a;
+    color: #e4e4e7;
 }
 
 .table th {
-    background: #0f172a;
+    background: #18181b;
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
-    color: #94a3b8;
+    color: #a1a1aa;
     cursor: pointer;
     user-select: none;
     transition: color 0.2s;
 }
 
 .table th:hover {
-    color: #f8fafc;
+    color: #ffffff;
 }
 
 .table th .headerContent {
@@ -88,7 +88,7 @@
 }
 
 .table tbody tr:hover {
-    background-color: rgba(51, 65, 85, 0.3);
+    background-color: rgba(255, 255, 255, 0.03);
 }
 
 .table tbody tr:last-child td {
@@ -106,31 +106,23 @@
 }
 
 .typeRole {
-    background: rgba(59, 130, 246, 0.15);
+    background: rgba(37, 99, 235, 0.15);
     color: #60a5fa;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
 .typeLocation {
-    background: rgba(45, 212, 191, 0.15);
-    color: #2dd4bf;
-    border: 1px solid rgba(45, 212, 191, 0.2);
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .typeFeedback {
-    background: rgba(168, 85, 247, 0.15);
-    color: #c084fc;
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.contentCell {
-    /* Set a reasonable width or percentage, and allow wrapping or nicer clipping */
-    width: 50%;
-    max-width: 0;
-    /* Important for flex/table overflow to work with ellipsis */
-}
-
-/* Update logic for content cell to be a bit smarter if needed */
 .contentCell {
     width: 60%;
     max-width: 400px;
@@ -141,7 +133,7 @@
 
 .dateCell {
     white-space: nowrap;
-    color: #94a3b8;
+    color: #71717a;
     font-family: monospace;
     width: 20%;
 }
@@ -150,34 +142,34 @@
 .statusSelect {
     appearance: none;
     background-color: transparent;
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    border: 1px solid rgba(161, 161, 170, 0.2);
     border-radius: 6px;
     padding: 0.25rem 2rem 0.25rem 0.75rem;
     font-size: 0.75rem;
     font-weight: 500;
-    color: #e2e8f0;
+    color: #e4e4e7;
     cursor: pointer;
     transition: all 0.2s;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.5rem center;
 }
 
 .statusSelect:hover {
-    border-color: #64748b;
-    background-color: rgba(30, 41, 59, 0.5);
+    border-color: #71717a;
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .statusSelect:focus {
     outline: none;
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
 }
 
 /* Status Colors within Select */
 .statuspending {
-    color: #94a3b8;
-    background-color: rgba(148, 163, 184, 0.1);
+    color: #a1a1aa;
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .statusin_progress {
@@ -203,12 +195,12 @@
     justify-content: center;
     align-items: center;
     height: 50vh;
-    color: #94a3b8;
+    color: #71717a;
 }
 
 .empty {
     text-align: center;
-    color: #64748b;
+    color: #71717a;
     margin-top: 4rem;
     font-size: 1.1rem;
 }
@@ -223,7 +215,7 @@
 .sectionTitle {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #60a5fa;
+    color: #ffffff;
     margin-bottom: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -237,7 +229,7 @@
     display: inline-block;
     width: 6px;
     height: 6px;
-    background-color: currentColor;
+    background-color: #ef4444;
     border-radius: 50%;
     margin-right: 0.75rem;
     opacity: 0.8;

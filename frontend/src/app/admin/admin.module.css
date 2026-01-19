@@ -1,83 +1,24 @@
-/* ... previous content ... */
-
+/* Main Container */
 .container {
     min-height: 100vh;
     background-color: #000000;
     color: #ffffff;
     display: flex;
-    flex-direction: row;
-}
-
-/* Sidebar Styling */
-.sidebar {
-    width: 260px;
-    background-color: #121212;
-    border-right: 1px solid #27272a;
-    display: flex;
     flex-direction: column;
-    padding: 1.5rem 1rem;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    flex-shrink: 0;
+    position: relative;
 }
 
-.sidebarHeader {
-    margin-bottom: 2rem;
-    padding-left: 0.5rem;
-}
-
-.sidebarTitle {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: -0.025em;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.sidebarNav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    flex: 1;
-}
-
-.navItem {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    color: #a1a1aa;
-    text-decoration: none;
-    transition: all 0.2s;
-    font-weight: 500;
-}
-
-.navItem:hover {
-    background-color: #18181b;
-    color: #ffffff;
-}
-
-.navItemActive {
-    background-color: rgba(37, 99, 235, 0.1);
-    color: #3b82f6;
-}
-
-.navItemActive:hover {
-    background-color: rgba(37, 99, 235, 0.15);
-}
-
+/* Main Content Area */
 .mainContent {
     flex: 1;
-    padding: 2rem;
-    overflow-y: auto;
-    max-width: 100%;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 120px 2rem 2rem 2rem;
+    /* Top padding to clear fixed Taskbar */
 }
 
-/* Content Header - Replaced Dashboard Header */
+/* Content Header */
 .contentHeader {
     margin-bottom: 2rem;
     padding-bottom: 1rem;
@@ -88,12 +29,23 @@
 }
 
 .contentTitle {
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 2rem;
+    font-weight: 700;
     color: #ffffff;
+    letter-spacing: -0.02em;
+    background: linear-gradient(to right, #fff, #a1a1aa);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* Updated login/loading containers to work within potential flex context */
+.dashboardContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* LOADING & AUTH STYLES (Preserved) */
 .loadingContainer {
     width: 100%;
     height: 100vh;
@@ -101,7 +53,8 @@
     align-items: center;
     justify-content: center;
     background-color: #000000;
-    color: #2563eb;
+    color: #ef4444;
+    /* Changed to red for admin vibe */
 }
 
 .loginContainer {
@@ -114,18 +67,9 @@
     background-color: #000000;
 }
 
-.loginCard,
-.explodedContainer {
-    /* Kept same as before */
+.loginCard {
     width: 100%;
     max-width: 400px;
-}
-
-/* Copy over all the previous styles for the login form, gimmick, etc. 
-   I am restating them here to ensure the full file is valid CSS module 
-*/
-
-.loginCard {
     background-color: #121212;
     border: 1px solid #27272a;
     border-radius: 12px;
@@ -163,28 +107,7 @@
 .subtitle {
     color: #a1a1aa;
     font-size: 0.875rem;
-    color: #a1a1aa;
-    font-size: 0.875rem;
     margin: 0;
-}
-
-.sidebarFooter {
-    margin-top: auto;
-    padding-top: 1rem;
-    border-top: 1px solid #27272a;
-}
-
-.userProfile {
-    padding: 0 1rem;
-    margin-bottom: 1rem;
-}
-
-.userEmail {
-    font-size: 0.875rem;
-    color: #9ca3af;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .form {
@@ -219,8 +142,8 @@
 
 .input:focus {
     outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 1px #2563eb;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 1px #ef4444;
 }
 
 .redButton {
@@ -248,7 +171,10 @@
     transform: scale(1.02);
 }
 
+/* EXPLOSION GIMMICK STYLES */
 .explodedContainer {
+    width: 100%;
+    max-width: 400px;
     text-align: center;
     padding: 2rem;
     color: #ef4444;
@@ -338,7 +264,7 @@
     letter-spacing: 4px;
 }
 
-/* Grid Layout for Dashboard - Restored to 3 Columns */
+/* DASHBOARD GRID STYLES */
 .grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
@@ -358,53 +284,90 @@
     }
 }
 
+@media (max-width: 768px) {
+    .mainContent {
+        padding: 100px 1rem 1rem 1rem;
+    }
+
+    .contentTitle {
+        font-size: 1.5rem;
+    }
+
+    .contentHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+
 .card {
-    padding: 1.5rem;
+    padding: 2rem;
     background-color: #121212;
     border: 1px solid #27272a;
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
+    border-radius: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     display: flex;
     flex-direction: column;
     height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.1), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card:hover::before {
+    opacity: 1;
 }
 
 .card:hover {
     border-color: rgba(37, 99, 235, 0.5);
     background-color: #18181b;
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
 .cardIcon {
-    width: 3rem;
-    height: 3rem;
+    width: 3.5rem;
+    height: 3.5rem;
     background-color: rgba(37, 99, 235, 0.1);
-    border-radius: 0.5rem;
+    border-radius: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     transition: transform 0.3s ease;
 }
 
 .card:hover .cardIcon {
-    transform: scale(1.1);
+    transform: scale(1.1) rotate(5deg);
+    background-color: rgba(37, 99, 235, 0.2);
 }
 
 .cardTitle {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
     color: #ffffff;
     transition: color 0.2s;
 }
 
 .card:hover .cardTitle {
-    color: #2563eb;
+    color: #3b82f6;
 }
 
 .cardDesc {
-    color: #9ca3af;
-    font-size: 0.875rem;
+    color: #a1a1aa;
+    font-size: 0.95rem;
+    line-height: 1.5;
 }

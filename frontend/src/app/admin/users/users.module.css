@@ -1,8 +1,9 @@
 .container {
     min-height: 100vh;
-    padding: 4rem 2rem;
-    background: #0f172a;
-    color: #f8fafc;
+    padding: 0;
+    /* Let layout handle padding */
+    background: #000000;
+    color: #f4f4f5;
     font-family: 'Inter', sans-serif;
 }
 
@@ -14,7 +15,9 @@
 .title {
     font-size: 2.5rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    background: linear-gradient(to right, #fff, #a1a1aa);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -22,7 +25,7 @@
 }
 
 .subtitle {
-    color: #94a3b8;
+    color: #a1a1aa;
     font-size: 1rem;
 }
 
@@ -30,9 +33,9 @@
 .tableContainer {
     width: 100%;
     overflow-x: auto;
-    background: #1e293b;
+    background: #121212;
     border-radius: 12px;
-    border: 1px solid #334155;
+    border: 1px solid #27272a;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     max-width: 1200px;
     margin: 0 auto;
@@ -48,24 +51,24 @@
 .table th,
 .table td {
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid #334155;
-    color: #e2e8f0;
+    border-bottom: 1px solid #27272a;
+    color: #e4e4e7;
 }
 
 .table th {
-    background: #0f172a;
+    background: #18181b;
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
-    color: #94a3b8;
+    color: #a1a1aa;
     cursor: pointer;
     user-select: none;
     transition: color 0.2s;
 }
 
 .table th:hover {
-    color: #f8fafc;
+    color: #ffffff;
 }
 
 .table th .headerContent {
@@ -89,7 +92,7 @@
 }
 
 .table tbody tr:hover {
-    background-color: rgba(51, 65, 85, 0.3);
+    background-color: rgba(255, 255, 255, 0.03);
 }
 
 .table tbody tr:last-child td {
@@ -104,7 +107,7 @@
 
 .dateCell {
     white-space: nowrap;
-    color: #94a3b8;
+    color: #71717a;
     font-family: monospace;
 }
 
@@ -119,15 +122,15 @@
 }
 
 .roleAdmin {
-    background: rgba(168, 85, 247, 0.15);
-    color: #c084fc;
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 .roleUser {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: #d4d4d8;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .loading {
