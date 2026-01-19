@@ -14,10 +14,10 @@ export default function PrivacyPolicy() {
                     <section>
                         <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '1.5rem', color: '#e4e4e7' }}>1. Introduction</h2>
                         <p style={{ color: '#a1a1aa', lineHeight: '1.8', fontSize: '1.05rem' }}>
-                            Welcome to Job Cloud ("we," "our," or "us"). We appreciate that you trust us with your personal information and we are committed to protecting your privacy.
+                            Welcome to HireMind ("we," "our," or "us"). We appreciate that you trust us with your personal information and we are committed to protecting your privacy.
                             This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our job aggregation and career management services.
                             <br /><br />
-                            By accessing or using Job Cloud, you agree to the terms of this Privacy Policy.
+                            By accessing or using HireMind, you agree to the terms of this Privacy Policy.
                         </p>
                     </section>
 
@@ -85,7 +85,7 @@ export default function PrivacyPolicy() {
                     <section>
                         <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '1.5rem', color: '#e4e4e7' }}>7. Contact Us</h2>
                         <p style={{ color: '#a1a1aa', lineHeight: '1.8', fontSize: '1.05rem' }}>
-                            If you have any questions about this Privacy Policy, please contact us at: <a href="mailto:support@jobcloud.com" style={{ color: '#60a5fa', textDecoration: 'none' }}>support@jobcloud.com</a>.
+                            If you have any questions about this Privacy Policy, please contact us at: <a href="mailto:support@hiremind.com" style={{ color: '#60a5fa', textDecoration: 'none' }}>support@hiremind.com</a>.
                         </p>
                     </section>
                 </div>
@@ -105,7 +105,7 @@ export default function PrivacyPolicy() {
 
                     <div className={styles.centerBlock}>
                         <div className={styles.copy}>
-                            &copy; {new Date().getFullYear()} Job Cloud. All rights reserved.
+                            &copy; {new Date().getFullYear()} HireMind. All rights reserved.
                         </div>
                     </div>
 

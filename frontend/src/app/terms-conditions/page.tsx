@@ -14,8 +14,8 @@ export default function TermsConditions() {
                     <section>
                         <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '1.5rem', color: '#e4e4e7' }}>1. Agreement to Terms</h2>
                         <p style={{ color: '#a1a1aa', lineHeight: '1.8', fontSize: '1.05rem' }}>
-                            These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity (“you”) and Job Cloud ("we," "us" or "our"),
-                            concerning your access to and use of the Job Cloud website. By accessing the Site, you confirm that you have read, understood, and agreed to be bound by all of these Terms and Conditions.
+                            These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity (“you”) and HireMind ("we," "us" or "our"),
+                            concerning your access to and use of the HireMind website. By accessing the Site, you confirm that you have read, understood, and agreed to be bound by all of these Terms and Conditions.
                             <br /><br />
                             If you do not agree with all of these terms, then you are expressly prohibited from using the Site and you must discontinue use immediately.
                         </p>
@@ -24,7 +24,7 @@ export default function TermsConditions() {
                     <section>
                         <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '1.5rem', color: '#e4e4e7' }}>2. Description of Service</h2>
                         <p style={{ color: '#a1a1aa', lineHeight: '1.8', fontSize: '1.05rem' }}>
-                            Job Cloud is a job aggregation and career management platform that compiles job listings from various sources and provides tools for users to manage their job search ("Service").
+                            HireMind is a job aggregation and career management platform that compiles job listings from various sources and provides tools for users to manage their job search ("Service").
                             We serve as an intermediary connecting candidates with potential opportunities but are not involved in the actual hiring process, interviews, or employment contracts.
                         </p>
                     </section>
@@ -80,7 +80,7 @@ export default function TermsConditions() {
                     <section>
                         <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '1.5rem', color: '#e4e4e7' }}>8. Contact Us</h2>
                         <p style={{ color: '#a1a1aa', lineHeight: '1.8', fontSize: '1.05rem' }}>
-                            To resolve a complaint regarding the Site or to receive further information regarding use of the Site, please contact us at: <a href="mailto:support@jobcloud.com" style={{ color: '#60a5fa', textDecoration: 'none' }}>support@jobcloud.com</a>.
+                            To resolve a complaint regarding the Site or to receive further information regarding use of the Site, please contact us at: <a href="mailto:support@hiremind.com" style={{ color: '#60a5fa', textDecoration: 'none' }}>support@hiremind.com</a>.
                         </p>
                     </section>
                 </div>
@@ -100,7 +100,7 @@ export default function TermsConditions() {
 
                     <div className={styles.centerBlock}>
                         <div className={styles.copy}>
-                            &copy; {new Date().getFullYear()} Job Cloud. All rights reserved.
+                            &copy; {new Date().getFullYear()} HireMind. All rights reserved.
                         </div>
                     </div>
 
