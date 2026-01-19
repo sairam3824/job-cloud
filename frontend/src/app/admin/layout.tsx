@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Loader2, LogOut, ShieldAlert, ArrowLeft, LayoutDashboard, MessageSquare, Building2, Users } from 'lucide-react'
+import { Loader2, ShieldAlert, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import styles from './admin.module.css'
+import AdminNavbar from './_components/AdminNavbar'
 
 export default function AdminLayout({
     children,
@@ -188,69 +189,13 @@ export default function AdminLayout({
         );
     }
 
-    // Determine current section title based on pathname
-    let sectionTitle = "Overview";
-    if (pathname?.includes('/feedback')) sectionTitle = "Feedback";
-    if (pathname?.includes('/companies')) sectionTitle = "Companies";
-    if (pathname?.includes('/users')) sectionTitle = "Users";
-
     return (
         <div className={styles.container}>
-            {/* Sidebar */}
-            <aside className={styles.sidebar}>
-                <div className={styles.sidebarHeader}>
-                    <Link href="/admin" className={styles.sidebarTitle}>
-                        <ShieldAlert size={28} color="#3b82f6" />
-                        <span>HireMind Admin</span>
-                    </Link>
-                </div>
-
-                <nav className={styles.sidebarNav}>
-                    <Link
-                        href="/admin"
-                        className={`${styles.navItem} ${pathname === '/admin' ? styles.navItemActive : ''}`}
-                    >
-                        <LayoutDashboard size={20} />
-                        Dashboard
-                    </Link>
-
-                    <Link
-                        href="/admin/feedback"
-                        className={`${styles.navItem} ${pathname?.includes('/feedback') ? styles.navItemActive : ''}`}
-                    >
-                        <MessageSquare size={20} />
-                        Feedback
-                    </Link>
-
-                    <Link
-                        href="/admin/companies"
-                        className={`${styles.navItem} ${pathname?.includes('/companies') ? styles.navItemActive : ''}`}
-                    >
-                        <Building2 size={20} />
-                        Companies
-                    </Link>
-
-                    <Link
-                        href="/admin/users"
-                        className={`${styles.navItem} ${pathname?.includes('/users') ? styles.navItemActive : ''}`}
-                    >
-                        <Users size={20} />
-                        Users
-                    </Link>
-                </nav>
-
-                <div className={styles.sidebarFooter}>
-                    <div className={styles.userProfile}>
-                        <p className={styles.userEmail}>{user.email}</p>
-                    </div>
-                </div>
-            </aside>
+            {/* Top Navigation Taskbar */}
+            <AdminNavbar />
 
             {/* Main Content Area */}
             <main className={styles.mainContent}>
-                <header className={styles.contentHeader}>
-                    <h1 className={styles.contentTitle}>{sectionTitle}</h1>
-                </header>
                 {children}
             </main>
         </div>
