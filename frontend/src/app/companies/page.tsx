@@ -8,24 +8,8 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-
-type Job = {
-    id: string;
-    title: string;
-    company: string;
-    location: string;
-    crawled_date: string;
-    job_url: string;
-    description?: string;
-    site?: string;
-    job_type?: string;
-    min_amount?: number;
-    max_amount?: number;
-    currency?: string;
-    interval?: string;
-    job_level?: string;
-    company_logo?: string;
-};
+import { useJobs } from "@/context/JobsContext";
+import { Job, CompanyGroup } from "@/types";
 
 const SUGGESTED_ROLES = [
     "Software Engineer",
@@ -48,22 +32,26 @@ const JOB_TYPES = [
     "Parttime"
 ];
 
-type CompanyGroup = {
-    name: string;
-    jobs: Job[];
-};
-
 export default function CompaniesPage() {
     const { user } = useAuth();
     const router = useRouter();
-    const [query, setQuery] = useState("");
+
+    // Use Context for persistent state
+    const {
+        companyResults: results,
+        setCompanyResults: setResults,
+        companyQuery: query,
+        setCompanyQuery: setQuery,
+        hasSearchedCompanies: hasSearched,
+        setHasSearchedCompanies: setHasSearched
+    } = useJobs();
+
     const [jobTitleQuery, setJobTitleQuery] = useState("");
     const [jobTypeQuery, setJobTypeQuery] = useState("");
     const [showRoleSuggestions, setShowRoleSuggestions] = useState(false);
     const [showJobTypeSuggestions, setShowJobTypeSuggestions] = useState(false);
-    const [results, setResults] = useState<CompanyGroup[]>([]);
+    // Local loading state for search action
     const [loading, setLoading] = useState(false);
-    const [hasSearched, setHasSearched] = useState(false);
     const [selectedJob, setSelectedJob] = useState<Job | null>(null);
     const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
     const [savedCompanyNames, setSavedCompanyNames] = useState<Set<string>>(new Set());
@@ -161,6 +149,10 @@ export default function CompaniesPage() {
 
     // Debounce search
     useEffect(() => {
+        // If we have results and haven't typed anything new (e.g. initial mount with existing query), 
+        // we could optionally skip, but let's refresh to be safe, 
+        // but suppress loading indicator if we have data?
+        // Actually, let's just search.
         const timer = setTimeout(() => {
             searchCompanies(query, jobTitleQuery, jobTypeQuery);
         }, 500);
@@ -178,6 +170,10 @@ export default function CompaniesPage() {
     }, []);
 
     const searchCompanies = async (companyName: string, title: string, type: string) => {
+        // Only show loading if we don't have results? 
+        // Or specific UX decision: Loading spinner usually good.
+        // If we want "silent update", we can check results.length
+
         setLoading(true);
         setHasSearched(true);
 
@@ -208,7 +204,10 @@ export default function CompaniesPage() {
             if (data) {
                 // Group by company
                 const groups: Record<string, Job[]> = {};
-                data.forEach(job => {
+                // Cast data to Job[]
+                const jobsData = data as unknown as Job[];
+
+                jobsData.forEach(job => {
                     const company = job.company || "Unknown Company";
                     if (!groups[company]) {
                         groups[company] = [];
@@ -421,7 +420,7 @@ export default function CompaniesPage() {
                                 </div>
                             ))}
                         </div>
-                    ) : hasSearched && query.trim() ? (
+                    ) : (hasSearched && query.trim()) ? (
                         <div className={styles.loadingState}>
                             No companies found matching "{query}"
                         </div>
