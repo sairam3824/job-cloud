@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import ReactMarkdown from 'react-markdown';
+import { useJobs } from "@/context/JobsContext";
+import { Job } from "@/types";
 import {
     Calendar as CalendarIcon,
     MapPin,
@@ -45,26 +47,6 @@ const formatDate = (date: Date) => {
 const formatJobType = (type: string | null | undefined) => {
     if (!type) return "N/A";
     return type.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
-};
-
-
-
-type Job = {
-    id: string;
-    title: string;
-    company: string;
-    location: string;
-    job_url: string;
-    site: string;
-    crawled_date: string;
-    description: string;
-    job_type: string;
-    job_url_direct?: string;
-    is_remote?: boolean;
-    job_level?: string;
-    role?: string;
-    job_function?: string;
-    company_logo?: string;
 };
 
 const SUGGESTED_ROLES = [
@@ -109,19 +91,27 @@ const JOB_LEVELS = [
 import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
-    // State
+    // State from Context
+    const {
+        jobs,
+        loading,
+        selectedDate,
+        setSelectedDate,
+        availableDates,
+        fetchJobs,
+        error
+    } = useJobs();
+
     const { user } = useAuth();
     const router = useRouter();
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const [jobs, setJobs] = useState<Job[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [availableDates, setAvailableDates] = useState<Set<string>>(new Set());
+
     const [selectedJob, setSelectedJob] = useState<Job | null>(null);
     const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
     const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
     const [saving, setSaving] = useState(false);
     const [applying, setApplying] = useState(false);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+    const [showToast, setShowToast] = useState(false);
 
     // Fetch saved and applied jobs
     useEffect(() => {
@@ -298,122 +288,8 @@ export default function Home() {
         const x = new Date();
         x.setDate(x.getDate() + d);
         setSelectedDate(x);
-        fetchJobs(x);
+        fetchJobs(x); // Fetch jobs via context (which checks cache)
         setShowCal(false);
-    };
-
-    const [error, setError] = useState(false);
-    const [showToast, setShowToast] = useState(false);
-
-    // Fetch dates
-    useEffect(() => {
-        async function fetchDates() {
-            try {
-                // First get the most recent date from the DB
-                const { data: recentDateData, error: recentError } = await supabase
-                    .from("jobs")
-                    .select("crawled_date")
-                    .order("crawled_date", { ascending: false })
-                    .limit(1)
-                    .single();
-
-                if (recentDateData) {
-                    const latestDate = new Date(recentDateData.crawled_date);
-                    setSelectedDate(latestDate);
-                    fetchJobs(latestDate);
-                } else {
-                    // Fallback to today if no jobs found
-                    fetchJobs(new Date());
-                }
-
-                // Initial fetch logic to populate the calendar
-                let allDates: string[] = [];
-                let from = 0;
-                const batchSize = 1000;
-                let moreAvailable = true;
-
-                while (moreAvailable) {
-                    const { data, error } = await supabase
-                        .from("jobs")
-                        .select("crawled_date")
-                        .range(from, from + batchSize - 1);
-
-                    if (error) throw error;
-
-                    if (data) {
-                        const dates = data.map(j => j.crawled_date);
-                        allDates = [...allDates, ...dates];
-
-                        if (data.length < batchSize) {
-                            moreAvailable = false;
-                        } else {
-                            from += batchSize;
-                        }
-                    } else {
-                        moreAvailable = false;
-                    }
-                }
-
-                if (allDates.length > 0) {
-                    setAvailableDates(new Set(allDates));
-                }
-            } catch (e) {
-                console.error("Error fetching dates", e);
-                fetchJobs(new Date()); // Fallback on error
-            }
-        }
-        fetchDates();
-    }, []);
-
-    const fetchJobs = async (date: Date) => {
-        setLoading(true);
-        setError(false);
-        const dateStr = formatDate(date);
-
-        try {
-            let allJobs: Job[] = [];
-            let from = 0;
-            const batchSize = 1000;
-            let moreAvailable = true;
-
-            while (moreAvailable) {
-                const { data, error: sbError } = await supabase
-                    .from("jobs")
-                    .select("*")
-                    .eq("crawled_date", dateStr)
-                    .order("created_at", { ascending: false })
-                    .range(from, from + batchSize - 1);
-
-                if (sbError) {
-                    throw sbError;
-                }
-
-                if (data) {
-                    allJobs = [...allJobs, ...data];
-                    if (data.length < batchSize) {
-                        moreAvailable = false;
-                    } else {
-                        from += batchSize;
-                    }
-                } else {
-                    moreAvailable = false;
-                }
-            }
-
-            console.log(`Fetched total ${allJobs.length} jobs for ${dateStr}`);
-
-            setJobs(allJobs);
-            if (allJobs.length > 0) {
-                setSelectedJob(null);
-            } else {
-                setSelectedJob(null);
-            }
-        } catch (e) {
-            console.error(e);
-            setJobs([]);
-            setError(true);
-        }
-        setLoading(false);
     };
 
     // Filter jobs based on search
@@ -437,10 +313,6 @@ export default function Home() {
         if (selectedRoles.length > 0) {
             // Match if job title includes ANY of the selected roles
             matchesTitle = selectedRoles.some(role => jobTitle.includes(role.toLowerCase()));
-            // Optionally, we can also ALSO require searchQuery if it exists?
-            // Usually if both are present, we might want to AND them or OR them.
-            // Given the UI, if I select "Software Engineer" and type "Senior", I expect "Senior Software Engineer".
-            // So: (Match ANY selected role) AND (Match search query if present)
             if (matchesTitle && normSearch) {
                 matchesTitle = jobTitle.includes(normSearch);
             }
@@ -479,9 +351,6 @@ export default function Home() {
             matchesJobLevel = selectedJobLevels.some(level => jobLevel.includes(level.toLowerCase()));
             if (matchesJobLevel && normLevel) {
                 if (!jobLevel || jobLevel === "not applicable") {
-                    // matchesJobLevel = true; // Wait, if I explicitly type/select level, I probably want matches
-                    // If I select "Entry Level", I don't want "Not Applicable"?
-                    // Let's assume strict match if selected.
                     matchesJobLevel = jobLevel.includes(normLevel);
                 } else {
                     matchesJobLevel = jobLevel.includes(normLevel);
@@ -500,13 +369,8 @@ export default function Home() {
         return matchesTitle && matchesCompany && matchesLocation && matchesJobType && matchesJobLevel;
     });
 
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newDate = new Date(e.target.value);
-        if (!isNaN(newDate.getTime())) {
-            setSelectedDate(newDate);
-            fetchJobs(newDate);
-        }
-    };
+    // Handle initial fetch of data - now handled by Context on mount
+    // No useEffect needed for fetching dates or jobs here.
 
     // Swipe Logic
     const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -955,12 +819,6 @@ export default function Home() {
                                     )}
 
                                     {appliedJobIds.has(selectedJob.id) ? (
-                                        // If applied, show "Applied" button (unless Direct was also shown and applied? Usually just show one if both are same status, but here they track the same job ID)
-                                        // If Direct button is present and says "Applied", we probably don't need this one to say "Applied" too, or both can.
-                                        // However, simplifying: selectedJob.id is the key. So both would toggle.
-                                        // To avoid visual clutter, if Direct exists, maybe we hide this secondary one if applied?
-                                        // But usually "Apply on Site" is the main one.
-                                        // Let's just make this one reflect status too.
                                         (!selectedJob.job_url_direct || selectedJob.job_url_direct === 'NULL') ? (
                                             <button
                                                 onClick={() => handleToggleApplied(selectedJob)}
@@ -970,15 +828,6 @@ export default function Home() {
                                                 Applied on {selectedJob.site || "Site"} <Check size={18} />
                                             </button>
                                         ) : (
-                                            // If Direct exists and is shown, and we are applied, we might not need to show THIS button as applied too.
-                                            // But the user might want to access the "Apply on X" link again?
-                                            // The logic: If applied, allow toggle off.
-                                            // If "Apply Direct" marks it applied, this button also becomes "Applied".
-                                            // Let's just render the 'Apply on Site' version if direct is missing, OR if we want to show both options?
-                                            // Existing code shows BOTH if direct exists.
-                                            // If applied, showing two big green "Applied" buttons is weird.
-                                            // Let's just make the second one a "View Link" if applied?
-                                            // Or just keep it consistent. The user said "mark it as applied" and "chance to make it not applied".
                                             null
                                         )
                                     ) : (
@@ -995,15 +844,6 @@ export default function Home() {
                                             <ExternalLink size={18} />
                                         </a>
                                     )}
-
-                                    {/* If we hid the second button when applied because the first one shows applied, we need to ensure at least one applied button shows. */}
-                                    {/* If job_url_direct exists -> First button shows Applied. Second button is hidden (null). Good. */}
-                                    {/* If job_url_direct NULL -> First button hidden. Second button shows Applied. Good. */}
-                                    {/* Wait, what if someone wants to visit the link again after applying? */}
-                                    {/* Maybe the "Applied" button should essentially act as a toggle, but what about re-visiting? */}
-                                    {/* User request: "chance to make it not applied". So clicking "Applied" should toggle off. */}
-                                    {/* If they want to visit again, they can toggle off to get the link back, OR we add a small icon link. */}
-                                    {/* For now, sticking to the requested behavior: Mark as applied (Green), Click to un-apply. */}
 
                                     <button
                                         onClick={() => handleToggleSave(selectedJob.id)}
