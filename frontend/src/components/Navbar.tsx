@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import {
     Briefcase,
@@ -10,9 +11,14 @@ import {
     LogOut,
     User,
 } from "lucide-react";
-import FeedbackWidget from "@/components/FeedbackWidget";
 import { useAuth } from "@/context/AuthContext";
 import styles from "./Navbar.module.css";
+
+// Lazy load FeedbackWidget - not needed for initial page render
+const FeedbackWidget = dynamic(() => import("@/components/FeedbackWidget"), {
+    ssr: false,
+    loading: () => <span style={{ color: '#a1a1aa' }}>Feedback</span>
+});
 
 export default function Navbar() {
     const pathname = usePathname();
@@ -277,7 +283,7 @@ export default function Navbar() {
                     </div>
                 )}
             </nav>
-            <div className={styles.navSpacer} />
+            {!pathname?.startsWith('/jobs') && <div className={styles.navSpacer} />}
         </>
     );
 }
